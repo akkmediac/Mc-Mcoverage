@@ -20,27 +20,25 @@ export default function Login() {
   const { signIn } = useAuth();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    supabase.functions.invoke('seed-test-users').catch((e) => console.warn('Seed failed', e?.message || e));
-  }, []);
+  // Seed call removed — user creation is admin-only via /admin/create-user
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
-    // Rate limiting check
-    const clientIP = 'login-attempt'; // In production, use actual IP
-    if (!rateLimiter.isAllowed(clientIP)) {
-      setError('በጣም ብዙ የመግባት ሙከራዎች። እባክዎ ትንሽ ይጠብቁ።');
+    // Sanitize office name first
+    const sanitizedOfficeName = sanitizeOfficeName(officeName);
+    if (sanitizedOfficeName !== officeName) {
+      setError('የጽህፈት ቤት ስም ውስጥ የማይፈቀዱ ቁምፊዎች አሉ።');
       setLoading(false);
       return;
     }
 
-    // Sanitize office name
-    const sanitizedOfficeName = sanitizeOfficeName(officeName);
-    if (sanitizedOfficeName !== officeName) {
-      setError('የጽህፈት ቤት ስም ውስጥ የማይፈቀዱ ቁምፊዎች አሉ።');
+    // Rate limiting check — use sanitized office name as identifier
+    const clientIdentifier = `login:${sanitizedOfficeName}`;
+    if (!rateLimiter.isAllowed(clientIdentifier)) {
+      setError('በጣም ብዙ የመግባት ሙከራዎች። እባክዎ ትንሽ ይጠብቁ።');
       setLoading(false);
       return;
     }

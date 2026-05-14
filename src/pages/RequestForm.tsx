@@ -72,21 +72,13 @@ export default function RequestForm() {
     const sanitizedAgenda = sanitizeAgenda(formData.agenda);
 
     // Parse Ethiopian date and time
-    console.log('🔍 Debug: Parsing Ethiopian date:', formData.coverageDate);
-    console.log('🔍 Debug: Parsing Ethiopian time:', formData.coverageTime);
-    
     const ethDate = parseEthiopianDate(formData.coverageDate);
     const ethTime = parseEthiopianTime(formData.coverageTime);
-
-    console.log('🔍 Debug: Parsed Ethiopian date:', ethDate);
-    console.log('🔍 Debug: Parsed Ethiopian time:', ethTime);
     
     // Extract time period from the time string
-    const timePeriod = ethTime.period || 'ጥዋት'; // Default to morning if not specified
-    console.log('🔍 Debug: Extracted time period:', timePeriod);
+    const timePeriod = ethTime.period || 'ጥዋት';
 
     if (!ethDate || !ethTime) {
-      console.error('❌ Error: Failed to parse Ethiopian date or time');
       setErrorDetails({
         title: "የተሳሳተ የቀን እና ሰዓት ግብዓት",
         description: "እባክዎ ትክክለኛ ቀን እና ሰዓት ያስገቡ። የሚያስገቡት ቀን እና ሰዓት በኢትዮጵያ አቆጣጠር መሆን አለበት።"
@@ -97,23 +89,14 @@ export default function RequestForm() {
     }
 
     // Convert to Gregorian date and 24-hour time
-    console.log('🔍 Debug: Converting to Gregorian...');
     const gregorianDate = ethiopianToGregorianAccurate(ethDate.year, ethDate.month, ethDate.day);
     const time24Hour = ethiopianTimeTo24Hour(ethTime.hour!, ethTime.minute!, ethTime.period!);
-    
-    console.log('🔍 Debug: Gregorian date:', gregorianDate);
-    console.log('🔍 Debug: 24-hour time:', time24Hour);
-    console.log('🔍 Debug: Gregorian date string:', gregorianDate.toISOString().split('T')[0]);
-    
 
     // Validate coverage time
-    console.log('🔍 Debug: Validating coverage time...');
     const validation = isValidCoverageTime(
       gregorianDate.toISOString().split('T')[0], 
       time24Hour
     );
-    
-    console.log('🔍 Debug: Validation result:', validation);
     
     if (!validation.isValid) {
       console.log('❌ Error: Frontend validation failed:', validation.message);
@@ -128,7 +111,6 @@ export default function RequestForm() {
 
 
     try {
-      console.log('🔍 Debug: Submitting to database...');
       const insertData = {
         user_id: user?.id,
         office_name: profile?.office_name || '',
@@ -139,18 +121,11 @@ export default function RequestForm() {
         agenda: sanitizedAgenda
       };
       
-      console.log('🔍 Debug: Insert data:', insertData);
-      
       const { error } = await supabase
         .from('media_requests')
         .insert(insertData);
 
       if (error) {
-        console.error('❌ Database error:', error);
-        console.error('❌ Error code:', error.code);
-        console.error('❌ Error message:', error.message);
-        console.error('❌ Error details:', error.details);
-        console.error('❌ Error hint:', error.hint);
         throw error;
       }
 

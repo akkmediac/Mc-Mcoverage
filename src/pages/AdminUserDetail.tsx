@@ -112,8 +112,12 @@ export default function AdminUserDetail() {
 
   const handleChangePassword = async () => {
     if (!userId) return;
-    if (!password || password.length < 6) {
-      toast({ title: 'ስህተት', description: 'የይለፍ ቃል ቢያንስ 6 ቁምፊ ይሁን', variant: 'destructive' });
+    if (!password || password.length < 8) {
+      toast({ title: 'ስህተት', description: 'የይለፍ ቃል ቢያንስ 8 ቁምፊ ይሁን', variant: 'destructive' });
+      return;
+    }
+    if (!/[A-Z]/.test(password) || !/[a-z]/.test(password) || !/[0-9]/.test(password)) {
+      toast({ title: 'ስህተት', description: 'የይለፍ ቃል ቢያንስ አንድ ትልቅ ፊደል፣ አንድ ትንሽ ፊደል እና አንድ ቁጥር ሊኖረው ይገባል', variant: 'destructive' });
       return;
     }
     if (password !== confirmPassword) {
